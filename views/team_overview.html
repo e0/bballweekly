@@ -1,0 +1,43 @@
+{{ define "content" }}
+
+<h1>Team overview</h1>
+
+{{ range $matchupOverview := .MatchupOverviews }}
+	<h2>Week {{$matchupOverview.Matchup.Week}}</h2>
+	<table class="u-full-width">
+		<thead>
+			<th>Team</th>
+			<th>FG</th>
+			<th>FG%</th>
+			<th>FT</th>
+			<th>FT%</th>
+			<th>3PTM</th>
+			<th>PTS</th>
+			<th>REB</th>
+			<th>AST</th>
+			<th>ST</th>
+			<th>BLK</th>
+			<th>TO</th>
+			<th>Score</th>
+		</thead>
+		<tbody>
+			<tr>
+				<td>{{ $matchupOverview.Team1.Name }}</td>
+				{{ range $stat := $matchupOverview.Team1.TeamStats.Stats }}
+					<td>{{ $stat.Value }}</td>
+				{{ end }}
+				<td>{{ $matchupOverview.Team1.TeamPoints.Total }}</td>
+			</tr>
+			<tr>
+				<td>{{ $matchupOverview.Team2.Name }}</td>
+				{{ range $stat := $matchupOverview.Team2.TeamStats.Stats }}
+					<td>{{ $stat.Value }}</td>
+				{{ end }}
+				<td>{{ $matchupOverview.Team2.TeamPoints.Total }}</td>
+			</tr>
+		</tbody>
+	</table>
+{{ end }}
+
+
+{{ end }}

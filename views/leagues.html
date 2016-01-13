@@ -1,0 +1,15 @@
+{{ define "content" }}
+
+<h1>My leagues</h1>
+<ul>
+	{{ range .Leagues }}
+		<li>
+			<a href="/team_overview?teamkey={{(index .Teams 0).TeamKey}}&currentweek={{.CurrentWeek}}">
+				{{.Name}}
+				(<small>{{(index .Teams 0).Name}}</small>)
+			</a>
+		</li>
+	{{ end }}
+</ul>
+
+{{ end }}
