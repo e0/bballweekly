@@ -1,12 +1,13 @@
 package main
 
 import (
-	"flag"
-	"fmt"
+	"encoding/json"
+//	"fmt"
 	"html/template"
 	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
 	"strconv"
 
 	"github.com/e0/goff"
@@ -14,31 +15,13 @@ import (
 )
 
 var consumer *oauth.Consumer
+var callbackDomain string
 var requestToken *oauth.RequestToken
 var client *goff.Client
 var tmpl map[string]*template.Template
 
 func main() {
-	clientKey := flag.String(
-		"clientKey",
-		"",
-		"Required client OAuth key.",
-	)
-
-	clientSecret := flag.String(
-		"clientSecret",
-		"",
-		"Required client OAuth secret.",
-	)
-
-	flag.Parse()
-
-	if len(*clientKey) == 0 || len(*clientSecret) == 0 {
-		fmt.Println("You must proved the client key and secret: bballweekly --clientKey=KEY --clientSecret=SECRET")
-	}
-
-	consumer = goff.GetConsumer(*clientKey, *clientSecret)
-
+	setupConfig()
 	tmpl = buildTemplates()
 
 	cssHandler := http.FileServer(http.Dir("./css/"))
@@ -52,6 +35,29 @@ func main() {
 	http.ListenAndServe(":8080", nil)
 }
 
+func setupConfig() {
+	configFile, err := os.Open("app_config.json")
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	decoder := json.NewDecoder(configFile)
+	configuration := Configuration{}
+	if err := decoder.Decode(&configuration); err != nil {
+		log.Fatal(err)
+	}
+	
+	consumer = goff.GetConsumer(configuration.ClientKey, configuration.ClientSecret)
+	callbackDomain = configuration.CallbackDomain
+}
+
+type Configuration struct {
+	CallbackDomain string
+	ClientKey      string
+	ClientSecret   string
+}
+
 func buildTemplates() map[string]*template.Template {
 	tmpl = make(map[string]*template.Template)
 	tmpl["leagues"] = template.Must(template.ParseFiles("views/leagues.html", "views/layout.html"))
@@ -62,7 +68,7 @@ func buildTemplates() map[string]*template.Template {
 func mainHandler(w http.ResponseWriter, r *http.Request) {
 	var url string
 	var err error
-	requestToken, url, err = consumer.GetRequestTokenAndUrl("bballweekly.com/yahoo_callback")
+	requestToken, url, err = consumer.GetRequestTokenAndUrl(callbackDomain + "/yahoo_callback")
 
 	if err != nil {
 		log.Fatal(err)
