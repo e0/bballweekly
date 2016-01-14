@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-//	"fmt"
 	"html/template"
 	"io/ioutil"
 	"log"
@@ -99,8 +98,7 @@ func yahooCallBackHandler(w http.ResponseWriter, r *http.Request) {
 
 func leaguesHandler(w http.ResponseWriter, r *http.Request) {
 	fantasyContent, err := client.GetFantasyContent(goff.YahooBaseURL + "/users;use_login=1/games;game_keys=353/leagues/teams")
-	//	fmt.Printf("%+v\n", fantasyContent)
-
+	
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -116,16 +114,22 @@ func leaguesHandler(w http.ResponseWriter, r *http.Request) {
 func teamOverviewHandler(w http.ResponseWriter, r *http.Request) {
 	teamKey := r.URL.Query().Get("teamkey")
 	currentWeek, _ := strconv.Atoi(r.URL.Query().Get("currentweek"))
+	leagueKey := r.URL.Query().Get("leagueKey")
+	
+	leagueSettings, err := client.GetLeagueSettings(leagueKey)
+	
+	if err != nil {
+		log.Println(err)
+	}
 
 	weeks := []int{currentWeek}
 	matchups, err := client.GetTeamMatchupsForWeeks(teamKey, weeks)
 
-	//	fmt.Printf("%+v\n", matchups)
-
 	matchupOverviews := []MatchupOverview{}
+	filteredCategories := getFilteredCategories(leagueSettings.StatCategories)
 
 	for _, m := range matchups {
-		matchupOverview := MatchupOverview{Matchup: m}
+		matchupOverview := MatchupOverview{Matchup: m, FilteredCategories: filteredCategories}
 
 		for i, t := range m.Teams {
 			u := goff.YahooBaseURL + "/team/" + t.TeamKey +
@@ -136,6 +140,8 @@ func teamOverviewHandler(w http.ResponseWriter, r *http.Request) {
 			if err != nil {
 				log.Fatal(err)
 			}
+			
+			teamContent.Team.TeamStats.Stats = getFilteredStats(teamContent.Team.TeamStats.Stats, filteredCategories)
 
 			if i == 0 {
 				matchupOverview.Team1 = teamContent.Team
@@ -153,8 +159,15 @@ func teamOverviewHandler(w http.ResponseWriter, r *http.Request) {
 
 	viewName := "team_overview"
 	p, _ := loadPage(viewName)
+	
+	pageData :=  &TeamOverviewPage{
+		Page: *p,
+		MatchupOverviews: matchupOverviews,
+	}
+	
+//	log.Printf("%+v\n", pageData.FilteredCategories)
 
-	tmpl[viewName].ExecuteTemplate(w, "layout", &TeamOverviewPage{Page: *p, MatchupOverviews: matchupOverviews})
+	tmpl[viewName].ExecuteTemplate(w, "layout", pageData)
 }
 
 func loadPage(contentView string) (*Page, error) {
@@ -168,6 +181,32 @@ func loadPage(contentView string) (*Page, error) {
 
 func loadViews(contentView string) (*template.Template, error) {
 	return template.ParseFiles("views/layout.html", "views/"+contentView+".html")
+}
+
+func getFilteredCategories(categories []goff.Stat) ([]goff.Stat) {
+	filteredCategories := []goff.Stat{}
+	
+	for _, cat := range categories {
+		if (!cat.IsOnlyDisplayStat) {
+			filteredCategories = append(filteredCategories, cat)
+		}
+	}
+	
+	return filteredCategories
+}
+
+func getFilteredStats(stats []goff.Stat, categories []goff.Stat) ([]goff.Stat) {
+	filteredStats := []goff.Stat{}
+	
+	for _, stat := range stats {
+		for _, cat := range categories {
+			if stat.StatId == cat.StatId {
+				filteredStats = append(filteredStats, stat)
+			}
+		}
+	}
+	
+	return filteredStats
 }
 
 type Page struct {
@@ -186,6 +225,7 @@ type TeamOverviewPage struct {
 
 type MatchupOverview struct {
 	Matchup goff.Matchup
+	FilteredCategories []goff.Stat
 	Team1   goff.Team
 	Team2   goff.Team
 }

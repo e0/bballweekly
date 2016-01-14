@@ -7,17 +7,9 @@
 	<table class="u-full-width">
 		<thead>
 			<th>Team</th>
-			<th>FG</th>
-			<th>FG%</th>
-			<th>FT</th>
-			<th>FT%</th>
-			<th>3PTM</th>
-			<th>PTS</th>
-			<th>REB</th>
-			<th>AST</th>
-			<th>ST</th>
-			<th>BLK</th>
-			<th>TO</th>
+			{{ range $cat := $matchupOverview.FilteredCategories }}
+				<th>{{ $cat.DisplayName }}</th>
+			{{ end }}
 			<th>Score</th>
 		</thead>
 		<tbody>

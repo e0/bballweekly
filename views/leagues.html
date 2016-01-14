@@ -4,7 +4,7 @@
 <ul>
 	{{ range .Leagues }}
 		<li>
-			<a href="/team_overview?teamkey={{(index .Teams 0).TeamKey}}&currentweek={{.CurrentWeek}}">
+			<a href="/team_overview?teamkey={{(index .Teams 0).TeamKey}}&currentweek={{.CurrentWeek}}&leagueKey={{.LeagueKey}}">
 				{{.Name}}
 				(<small>{{(index .Teams 0).Name}}</small>)
 			</a>
