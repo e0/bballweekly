@@ -3,32 +3,104 @@
 <h1>Team overview</h1>
 
 {{ range $matchupOverview := .MatchupOverviews }}
-	<h2>Week {{$matchupOverview.Matchup.Week}}</h2>
-	<table class="u-full-width">
-		<thead>
-			<th>Team</th>
-			{{ range $cat := $matchupOverview.FilteredCategories }}
-				<th>{{ $cat.DisplayName }}</th>
-			{{ end }}
-			<th>Score</th>
-		</thead>
-		<tbody>
-			<tr>
-				<td>{{ $matchupOverview.Team1.Name }}</td>
-				{{ range $stat := $matchupOverview.Team1.TeamStats.Stats }}
-					<td>{{ $stat.Value }}</td>
-				{{ end }}
-				<td>{{ $matchupOverview.Team1.TeamPoints.Total }}</td>
-			</tr>
-			<tr>
-				<td>{{ $matchupOverview.Team2.Name }}</td>
-				{{ range $stat := $matchupOverview.Team2.TeamStats.Stats }}
-					<td>{{ $stat.Value }}</td>
-				{{ end }}
-				<td>{{ $matchupOverview.Team2.TeamPoints.Total }}</td>
-			</tr>
-		</tbody>
-	</table>
+  <h2>Week {{$matchupOverview.Matchup.Week}}</h2>
+  <h5>Current stats</h5>
+  <table class="u-full-width">
+    <thead>
+      <th>Team</th>
+      {{ range $cat := $matchupOverview.FilteredCategories }}
+        <th>{{ $cat.DisplayName }}</th>
+      {{ end }}
+      <th>Score</th>
+    </thead>
+    <tbody>
+      <tr>
+        <td>{{ $matchupOverview.Team1.Name }}</td>
+        {{ range $stat := $matchupOverview.Team1.TeamStats.Stats }}
+          <td>{{ $stat.Value }}</td>
+        {{ end }}
+        <td>{{ $matchupOverview.Team1.TeamPoints.Total }}</td>
+      </tr>
+      <tr>
+        <td>{{ $matchupOverview.Team2.Name }}</td>
+        {{ range $stat := $matchupOverview.Team2.TeamStats.Stats }}
+          <td>{{ $stat.Value }}</td>
+        {{ end }}
+        <td>{{ $matchupOverview.Team2.TeamPoints.Total }}</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5>Projected stats</h5>
+  <table class="u-full-width">
+    <thead>
+      <th>Team</th>
+      {{ range $cat := $matchupOverview.FilteredCategories }}
+        <th>{{ $cat.DisplayName }}</th>
+      {{ end }}
+      <th>Score</th>
+    </thead>
+    <tbody>
+    </tbody>
+  </table>
+  <h5>Number of games</h5>
+  <div class="row">
+    <div>
+      <p style="font-weight:bold;">{{ $matchupOverview.Team1.Name }}</p>
+      <table class="u-full-width">
+        <thead>
+          <th>Name</th>
+          {{ range $cat := $matchupOverview.FilteredCategories }}
+            <th>{{ $cat.DisplayName }}</th>
+          {{ end }}
+        </thead>
+        <tbody>
+        {{ range $player := $matchupOverview.Team1.Players }}
+          {{ $projectedStats := index $matchupOverview.Team1ProjectedStats.PlayerStats $player.PlayerKey }}
+          <tr>
+            <td>{{ $player.Name.Full }} ({{ index $matchupOverview.GamesThisWeek $player.EditorialTeamAbbr }})</td>
+            <td>{{ $projectedStats.FGP }}</td>
+                  <td>{{ $projectedStats.FTP }}</td>
+                  <td>{{ $projectedStats.Threes }}</td>
+                  <td>{{ $projectedStats.PTS }}</td>
+                  <td>{{ $projectedStats.REB }}</td>
+                  <td>{{ $projectedStats.AST }}</td>
+                  <td>{{ $projectedStats.ST }}</td>
+                  <td>{{ $projectedStats.BLK }}</td>
+                  <td>{{ $projectedStats.TO }}</td>
+          </tr>
+        {{ end }}
+        </tbody>
+      </table>
+    </div>
+    <div>
+      <p style="font-weight:bold;">{{ $matchupOverview.Team2.Name }}</p>
+      <table class="u-full-width">
+        <thead>
+          <th>Name</th>
+          {{ range $cat := $matchupOverview.FilteredCategories }}
+            <th>{{ $cat.DisplayName }}</th>
+          {{ end }}
+        </thead>
+        <tbody>
+        {{ range $player := $matchupOverview.Team2.Players }}
+          {{ $projectedStats := index $matchupOverview.Team2ProjectedStats.PlayerStats $player.PlayerKey }}
+          <tr>
+            <td>{{ $player.Name.Full }} ({{ index $matchupOverview.GamesThisWeek $player.EditorialTeamAbbr }})</td>
+            <td>{{ $projectedStats.FGP }}</td>
+                  <td>{{ $projectedStats.FTP }}</td>
+                  <td>{{ $projectedStats.Threes }}</td>
+                  <td>{{ $projectedStats.PTS }}</td>
+                  <td>{{ $projectedStats.REB }}</td>
+                  <td>{{ $projectedStats.AST }}</td>
+                  <td>{{ $projectedStats.ST }}</td>
+                  <td>{{ $projectedStats.BLK }}</td>
+                  <td>{{ $projectedStats.TO }}</td>
+          </tr>
+        {{ end }}
+        </tbody>
+      </table>        
+    </div>
+  </div>
 {{ end }}
 
 
